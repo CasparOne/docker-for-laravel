@@ -1,10 +1,10 @@
-FROM php:7.2.10-fpm-alpine
+FROM php:7.3-fpm-alpine
 LABEL Description="Application container"
 
 ENV PS1='\[\033[1;32m\]🐳  \[\033[1;36m\][\u@\h] \[\033[1;34m\]\w\[\033[0;35m\] \[\033[1;36m\]# \[\033[0m\]'
 
-ENV COMPOSER_VERSION 1.7.2
-## Looked here: <https://github.com/prooph/docker-files/blob/master/php/7.2-cli>
+ENV COMPOSER_VERSION 1.8.6
+## Looked here: <https://github.com/prooph/docker-files/blob/master/php/7.3-cli>
 ENV PHP_REDIS_VERSION 4.1.1
 ENV PHP_XDEBUG_VERSION 2.6.0
 
@@ -125,16 +125,11 @@ ENV COMPOSER_HOME /tmp
 ENV PATH /scripts:/scripts/aliases:$PATH
 
 RUN set -xe \
-    && mkdir -p "$COMPOSER_HOME" \
     # install composer
-    && php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');" \
-    && php -r "if(hash_file('SHA384','/tmp/composer-setup.php')==='93b54496392c062774670ac18b134c3b3a95e5a5e5c8f1a9f'.\
-    '115f203b75bf9a129d5daa8ba6a13e2cc8a1da0806388a8'){echo 'Verified';}else{unlink('/tmp/composer-setup.php');}" \
-    && php /tmp/composer-setup.php --no-ansi --install-dir=/usr/bin --filename=composer --version=$COMPOSER_VERSION \
+    && curl -sS https://getcomposer.org/installer | php -- --version=${COMPOSER_VERSION} --install-dir=/usr/local/bin --filename=composer
     && composer --ansi --version --no-interaction \
     && composer --no-interaction global require 'hirak/prestissimo' \
     && composer clear-cache \
-    && rm -rf /tmp/composer-setup.php /tmp/.htaccess \
     # show php info
     && php -v \
     && php-fpm -v \
